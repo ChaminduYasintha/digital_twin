@@ -149,26 +149,8 @@ cd ~/digital_twin
 - **Connection errors**: Ensure the backend server is running on port 5000
 - **Import errors**: Make sure all dependencies are installed: `pip install -r backend/requirements.txt`
 
-### GCP Deployment
-
-- **Service won't start**: Check logs with `screen -r rag-backend`
-- **Can't access from browser**: Verify firewall rules allow ports 5000 and 8000
-- **App stops when closing SSH**: Make sure you used `screen` or `./start-all.sh` to run in background
-- **Connection errors**: Ensure both backend (port 5000) and frontend (port 8000) are running
-
-## Technologies Used
-
-- **Backend**: Flask, Google Generative AI, FAISS
-- **Frontend**: HTML, JavaScript, Tailwind CSS
-- **AI Model**: Gemini 2.5 Flash Preview
-- **Deployment**: GCP Compute Engine VM (simple Flask + Python HTTP server)
-
-## Security Notes
-
-- Keep your `GEMINI_API_KEY` secure and never commit it to version control
-- Regularly update system packages: `sudo apt update && sudo apt upgrade`
-- Configure firewall rules to restrict access as needed
-- For production, consider setting up HTTPS and using a reverse proxy like Nginx
+### Live Demo url
+http://136.117.28.118:8000/
 
 ## License
 

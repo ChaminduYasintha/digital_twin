@@ -4,6 +4,7 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Chamindu Yasintha - Agentic RAG</title>
     <script src="https://cdn.tailwindcss.com"></script>
@@ -248,7 +249,8 @@
         window.location.hostname === "localhost" ||
         window.location.hostname === "127.0.0.1"
           ? "http://127.0.0.1:5000"
-          : window.location.port === "8000" || window.location.pathname.includes("index.html")
+          : window.location.port === "8000" ||
+            window.location.pathname.includes("index.html")
           ? `http://${window.location.hostname}:5000` // Simple setup: direct Flask on port 5000
           : "/api"; // Production setup: Nginx proxy
 
@@ -274,7 +276,7 @@
         setTimeout(() => {
           typeMessage(
             "bot",
-            "👋 Hi there! I'm your friendly AI assistant. Upload a document using the 'Load Knowledge' button above, and I'll help answer any questions you have about it! How can I assist you today? 😊"
+            "👋 Hi there! I'm your AI assistant. Upload a document using the 'Load Knowledge' button above, and I'll help answer any questions you have about it! How can I assist you today? 😊"
           );
         }, 500);
       });

@@ -99,11 +99,32 @@ python app.py
 EOF
 chmod +x start-backend.sh
 
-# Frontend start script
+# Frontend start script with proper UTF-8 encoding
 cat > start-frontend.sh << 'EOF'
 #!/bin/bash
 cd ~/digital_twin/frontend
-python3 -m http.server 8000
+
+# Create a simple HTTP server with proper UTF-8 headers
+python3 << 'PYTHON_SCRIPT'
+import http.server
+import socketserver
+from pathlib import Path
+
+class UTF8HTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
+    def end_headers(self):
+        # Set UTF-8 charset for HTML files
+        if self.path.endswith('.html') or self.path == '/' or self.path.endswith('/'):
+            self.send_header('Content-Type', 'text/html; charset=utf-8')
+        super().end_headers()
+
+PORT = 8000
+Handler = UTF8HTTPRequestHandler
+
+with socketserver.TCPServer(("", PORT), Handler) as httpd:
+    print(f"🌐 Frontend server running on http://0.0.0.0:{PORT}")
+    print("📱 Serving with UTF-8 encoding for emojis")
+    httpd.serve_forever()
+PYTHON_SCRIPT
 EOF
 chmod +x start-frontend.sh
 
