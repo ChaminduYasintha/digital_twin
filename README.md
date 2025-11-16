@@ -113,6 +113,21 @@ Open the `frontend/index.html` file in your web browser.
 
 📖 **Full guide:** See [QUICK_START.md](QUICK_START.md) for detailed steps.
 
+### 🌐 Setting Up a Domain Name
+
+To use a domain name instead of IP:port (e.g., `http://yourdomain.com` instead of `http://136.117.28.118:8000`):
+
+1. **Point your domain to your server IP** (create an A record in your DNS settings)
+2. **Run the nginx setup script:**
+   ```bash
+   cd ~/digital_twin
+   chmod +x setup-nginx.sh
+   sudo ./setup-nginx.sh
+   ```
+3. **Access your app at:** `http://yourdomain.com`
+
+📖 **Full domain setup guide:** See [DOMAIN_SETUP.md](DOMAIN_SETUP.md) for detailed instructions.
+
 ## Service Management
 
 Once deployed, manage your app with:
@@ -150,6 +165,7 @@ cd ~/digital_twin
 - **Import errors**: Make sure all dependencies are installed: `pip install -r backend/requirements.txt`
 
 ### Live Demo url
+
 http://136.117.28.118:8000/
 
 ## License

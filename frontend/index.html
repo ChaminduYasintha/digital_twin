@@ -249,10 +249,9 @@
         window.location.hostname === "localhost" ||
         window.location.hostname === "127.0.0.1"
           ? "http://127.0.0.1:5000"
-          : window.location.port === "8000" ||
-            window.location.pathname.includes("index.html")
-          ? `http://${window.location.hostname}:5000` // Simple setup: direct Flask on port 5000
-          : "/api"; // Production setup: Nginx proxy
+          : window.location.port === "8000"
+          ? `http://${window.location.hostname}:5000` // Direct access on port 8000
+          : "/api"; // Production setup: Nginx proxy (port 80 or domain)
 
       let conversationHistory = [];
       let isTyping = false;
