@@ -77,9 +77,24 @@ cat > start-backend.sh << 'EOF'
 #!/bin/bash
 cd ~/digital_twin
 source venv/bin/activate
+
+# Load API key from .bashrc if not already set
+if [ -z "$GEMINI_API_KEY" ]; then
+    # Try to get it from .bashrc
+    if [ -f ~/.bashrc ]; then
+        export $(grep GEMINI_API_KEY ~/.bashrc | grep -v '^#' | xargs)
+    fi
+fi
+
+# Check if API key is set
+if [ -z "$GEMINI_API_KEY" ]; then
+    echo "ERROR: GEMINI_API_KEY not set!"
+    echo "Please set it with: export GEMINI_API_KEY='your-key-here'"
+    exit 1
+fi
+
 cd backend
 export PORT=5000
-export GEMINI_API_KEY="${GEMINI_API_KEY}"
 python app.py
 EOF
 chmod +x start-backend.sh

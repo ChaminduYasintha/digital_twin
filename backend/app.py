@@ -11,12 +11,19 @@ app = Flask(__name__)
 CORS(app)
 
 # --- CONFIG ---
-try:
-    api_key = os.environ["GEMINI_API_KEY"]
-    genai.configure(api_key=api_key)
-except KeyError:
+api_key = os.environ.get("GEMINI_API_KEY")
+if not api_key:
     print("ERROR: Set GEMINI_API_KEY environment variable.")
-    exit()
+    print("You can set it with: export GEMINI_API_KEY='your-key-here'")
+    exit(1)
+
+try:
+    genai.configure(api_key=api_key)
+    print("✓ API key configured")
+except Exception as e:
+    print(f"ERROR: Failed to configure API: {str(e)}")
+    print("Please check your GEMINI_API_KEY and try again.")
+    exit(1)
 
 # Models
 generation_model = genai.GenerativeModel('gemini-2.5-flash-preview-09-2025')
@@ -46,22 +53,26 @@ def retrieve_context(query, k=3):
     if vector_store is None:
         return [], []
     
-    # Embed Query
-    q_embed = genai.embed_content(model=embedding_model, content=query, task_type="RETRIEVAL_QUERY")["embedding"]
-    q_np = np.array([q_embed], dtype=np.float32)
-    
-    # Search
-    D, I = vector_store.search(q_np, k)
-    
-    found_texts = []
-    found_sources = []
-    
-    for idx in I[0]:
-        if idx < len(document_chunks):
-            found_texts.append(document_chunks[idx]['text'])
-            found_sources.append(document_chunks[idx]['source'])
-            
-    return found_texts, list(set(found_sources)) # Unique sources
+    try:
+        # Embed Query
+        q_embed = genai.embed_content(model=embedding_model, content=query, task_type="RETRIEVAL_QUERY")["embedding"]
+        q_np = np.array([q_embed], dtype=np.float32)
+        
+        # Search
+        D, I = vector_store.search(q_np, k)
+        
+        found_texts = []
+        found_sources = []
+        
+        for idx in I[0]:
+            if idx < len(document_chunks):
+                found_texts.append(document_chunks[idx]['text'])
+                found_sources.append(document_chunks[idx]['source'])
+                
+        return found_texts, list(set(found_sources)) # Unique sources
+    except Exception as e:
+        print(f"Error in retrieve_context: {str(e)}")
+        return [], []
 
 # --- AGENTIC LOGIC ---
 
@@ -77,16 +88,20 @@ def upload_file():
         full_text += page.extract_text() + "\n\n"
 
     # Chunk & Embed
-    document_chunks = get_text_chunks(full_text)
-    texts_only = [c['text'] for c in document_chunks]
-    
-    embeddings = genai.embed_content(model=embedding_model, content=texts_only, task_type="RETRIEVAL_DOCUMENT")["embedding"]
-    
-    # Build Index
-    vector_store = faiss.IndexFlatL2(768)
-    vector_store.add(np.array(embeddings, dtype=np.float32))
-    
-    return jsonify({"message": f"🎉 Awesome! I've successfully learned from *{file.filename}*. I indexed {len(document_chunks)} sections and I'm ready to answer your questions! Feel free to ask me anything about it. 😊"})
+    try:
+        document_chunks = get_text_chunks(full_text)
+        texts_only = [c['text'] for c in document_chunks]
+        
+        embeddings = genai.embed_content(model=embedding_model, content=texts_only, task_type="RETRIEVAL_DOCUMENT")["embedding"]
+        
+        # Build Index
+        vector_store = faiss.IndexFlatL2(768)
+        vector_store.add(np.array(embeddings, dtype=np.float32))
+        
+        return jsonify({"message": f"🎉 Awesome! I've successfully learned from *{file.filename}*. I indexed {len(document_chunks)} sections and I'm ready to answer your questions! Feel free to ask me anything about it. 😊"})
+    except Exception as e:
+        print(f"Error processing file: {str(e)}")
+        return jsonify({"error": f"Error processing file: {str(e)}. Please check your API key."}), 500
 
 @app.route('/chat', methods=['POST'])
 def chat():
@@ -143,10 +158,15 @@ def chat():
     """
     
     # Simple stateless call for demo (uses history in real app)
-    response = generation_model.generate_content(prompt)
+    try:
+        response = generation_model.generate_content(prompt)
+        reply_text = response.text if response.text else "I'm sorry, I couldn't generate a response. Please try again."
+    except Exception as e:
+        print(f"Error generating response: {str(e)}")
+        reply_text = f"I encountered an error: {str(e)}. Please check your API key and try again."
     
     return jsonify({
-        'reply': response.text,
+        'reply': reply_text,
         'thoughts': thoughts,  # Send thoughts to frontend
         'sources': sources     # Send sources to frontend
     })
